@@ -1,6 +1,3 @@
-# Other files
-.final_files
-
 *.annot
 *.cmo
 *.cma
@@ -30,3 +27,6 @@ setup.log
 
 # Local OPAM switch
 _opam/
+
+# Visual Studio Code generated files
+.vscode/

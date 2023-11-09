@@ -1,0 +1,4 @@
+(executable
+ (public_name pbA)
+ (name main)
+ (libraries pbA zarith))
