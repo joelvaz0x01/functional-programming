@@ -7,13 +7,17 @@
 
 To calculate $S_n$ for a given integer n we can use two equivalent recursive definitions:
 $$S_0 = 1$$
+
 $$S1 = 2$$
+
 $$S_n = 3S_n − 1 + \sum_{k=1}^{n-1} S_k S_{n−k−1}$$
 
 **or** 
 
 $$S_0 = 1$$
+
 $$S1 = 2$$
+
 $$S_n = {6n - 3 \over n + 1} S_{n − 1} - {n - 2 \over n + 1} S_{n-2}$$
 
 **For the $S_n$ in both definitions, $n > 1$.**
