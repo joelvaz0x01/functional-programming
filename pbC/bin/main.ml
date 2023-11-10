@@ -1,112 +1,140 @@
+(** @autor: Joel Vaz (a48906) *)
+
+(**
+  Function that verifies if the value is repeated in the line or column
+  @param value : value to verify
+  @param line : line to verify
+  @param column : column to verify
+  @param board : board to verify
+  @return Verification of the line and column
+*)
 let board_verification value line column board =
+  (* Ignore if the entry of the board is (0,0) *)
   if line = 0 && column = 0 then (true, true)
-    (* Ignorar se for a entrada do board for (0,0) *)
   else
+    (* Verify the necessary lines *)
     let rec line_f index max result =
-      (* Verifica as linhas necessárias *)
-      if result = false then false (* Valor repetido em board *)
-      else if index > max then result (* Fim do array board *)
+      if result = false then false (* Repeated value in board *)
+      else if index > max then result (* End of board array *)
       else
+        (* Return false if the value is repeated in the line *)
         let condition = not (board.(index).(column) = value) in
-        (* Retorna false caso o valor esteja repetido na linha *)
         line_f (index + 1) max condition
     in
+    (* Verify the necessary columns *)
     let rec column_f index max result =
-      (* Verifica as colunas necessárias *)
-      if result = false then false (* Valor repetido em board *)
-      else if index > max then result (* Fim do array board *)
+      if result = false then false (* Repeated value in board *)
+      else if index > max then result (* End of board array *)
       else
+        (* Return false if the value is repeated in the column *)
         let condition = not (board.(line).(index) = value) in
-        (* Retorna false caso o valor esteja repetido na coluna *)
         column_f (index + 1) max condition
     in
     (line_f 0 (line - 1) true, column_f 0 (column - 1) true)
 
-let rec restrinction_verification index result restrinctions restList board =
-  if index = restrinctions then result (* Fim do array das restrinções *)
+(**
+  Function that verifies if the value is repeated in the line or column
+  @param index : index of the restriction
+  @param result : result of the restriction verification
+  @param restrictions : number of restrictions
+  @param restList : array of restrictions
+  @param board : board to verify
+  @return Verification of the restrictions
+*)
+let rec restrinction_verification index result restrictions restList board =
+  if index = restrictions then result (* End of restrictions array *)
   else
     let x1, y1, x2, y2 = restList.(index) in
     if board.(x1).(y1) = 0 || board.(x2).(y2) = 0 then
-      (* Não se aplicam restrinções *)
-      restrinction_verification (index + 1) result restrinctions restList board
+      (* No restrictions apply *)
+      restrinction_verification (index + 1) result restrictions restList board
     else if board.(x1).(y1) > board.(x2).(y2) then
-      (* Respeita as restrinções *)
-      restrinction_verification (index + 1) true restrinctions restList board
-    else false (* Não respeita as restrinções *)
+      (* Respect the restrictions *)
+      restrinction_verification (index + 1) true restrictions restList board
+    else false (* Do not respect the restrictions *)
 
-let rec backtracking n max_n line column restList restrinctions board =
-  if line = max_n then true
-    (* Board feito com sucesso (linha passa para fora do board) *)
+(**
+  Function that makes backtracking
+  @param n : value to put in board
+  @param max_n : maximum value of board
+  @param line : line to put the value
+  @param column : column to put the value
+  @param restList : array of restrictions
+  @param restrictions : number of restrictions
+  @param board : board to put the value
+  @return Verification of the restrictions
+*)
+let rec backtracking n max_n line column restList restrictions board =
+  if line = max_n then true (* Board done (line out of board) *)
   else if n > max_n then
-    (* Fazer backtracking (n exedeu o valor máximo) *)
-    if line = 0 && column = 0 then false (* Impossível fazer backtracking *)
+    (* Do backtracking ('n' exceeded the maximum value) *)
+    if line = 0 && column = 0 then false (* Backtracking is impossible *)
     else
+      (* Reset initial value *)
       let () = board.(line).(column) <- 0 in
-      (* Reposição de valor inicial *)
       if column = 0 then
-        (* Decrementa a linha *)
+        (* Decrements the line *)
         let old_value = board.(line - 1).(max_n - 1) in
         backtracking (old_value + 1) max_n (line - 1) (max_n - 1) restList
-          restrinctions board
+          restrictions board
       else
-        (* Decrementa a coluna *)
+        (* Decrements the column *)
         let old_value = board.(line).(column - 1) in
         backtracking (old_value + 1) max_n line (column - 1) restList
-          restrinctions board
+          restrictions board
   else
     let line_verification, column_verification =
       board_verification n line column board
     in
     if line_verification = false || column_verification = false then
-      (* Valor já existe em board *)
-      backtracking (n + 1) max_n line column restList restrinctions board
+      (* Value already exists in board *)
+      backtracking (n + 1) max_n line column restList restrictions board
     else
+      (* Put the supposed correct value in the board *)
       let () = board.(line).(column) <- n in
-      (* Coloca no board o suposto valor correto *)
       let verification =
-        restrinction_verification 0 true restrinctions restList board
+        restrinction_verification 0 true restrictions restList board
       in
       if verification = true then
-        (* Respeita as restrinções *)
+        (* Respects the restrictions *)
         if column = max_n - 1 then
-          (* Avança para a próxima linha *)
-          backtracking 1 max_n (line + 1) 0 restList restrinctions board
+          (* Go to the next line *)
+          backtracking 1 max_n (line + 1) 0 restList restrictions board
         else
-          (* Avança para a próxima coluna *)
-          backtracking 1 max_n line (column + 1) restList restrinctions board
+          (* Go to the next column *)
+          backtracking 1 max_n line (column + 1) restList restrictions board
       else
-        (* Não respeita as restrinções *)
-        backtracking (n + 1) max_n line column restList restrinctions board
+        (* Do not respect the restrictions *)
+        backtracking (n + 1) max_n line column restList restrictions board
 
+(** Main function *)
 let () =
+  (* Board size *)
   let n = read_int () in
-  (* Leitura da dimenção de board *)
   if n >= 4 && n <= 6 then
     let board = Array.make_matrix n n 0 in
-    (* Array board do tipo matrix *)
-    let restrinctions = read_int () in
-    (* Leitura do número de restinções *)
-    if restrinctions >= 0 then
-      (* O tamanho do array tem que ser maior ou igual a 0 *)
-      let restList = Array.make restrinctions (0, 0, 0, 0) in
-      (* Array que conterá as restrinções *)
+    (* Number of restrictions *)
+    let restrictions = read_int () in
+    (* The size of the array has to be greater or equal to 0 *)
+    if restrictions >= 0 then
+      (* Array that has the restrictions *)
+      let restList = Array.make restrictions (0, 0, 0, 0) in
       let () =
-        for rest = 0 to restrinctions - 1 do
+        for rest = 0 to restrictions - 1 do
           Scanf.sscanf (read_line ()) "%d %d %d %d" (fun x1 y1 x2 y2 ->
               restList.(rest) <- (x1, y1, x2, y2))
         done
       in
-      let result = backtracking 1 n 0 0 restList restrinctions board in
+      let result = backtracking 1 n 0 0 restList restrictions board in
       if result = true then
+        (* Print final board *)
         for i = 0 to n - 1 do
           for j = 0 to n - 1 do
             if j = n - 1 then Printf.printf "%d" board.(i).(j)
-              (* Print board final *)
             else Printf.printf "%d " board.(i).(j)
           done;
           print_endline ""
         done
-      else print_endline "IMPOSSIBLE" (* Resolução impossível *)
-    else raise (invalid_arg "Invalid_value") (* Argumento inválido *)
+      else print_endline "IMPOSSIBLE"
+    else raise (invalid_arg "Invalid_value")
   else raise (invalid_arg "Invalid_value")
-(* Argumento inválido *)
