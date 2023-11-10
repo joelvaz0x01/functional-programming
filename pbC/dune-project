@@ -2,25 +2,19 @@
 
 (name pbC)
 
-(generate_opam_files true)
+(generate_opam_files false)
 
 (source
- (github username/reponame))
+ (github joelvaz0x01/functional-programming))
 
-(authors "Author Name")
+(authors "Joel Vaz")
 
-(maintainers "Maintainer Name")
+(maintainers "Joel Vaz")
 
-(license LICENSE)
-
-(documentation https://url/to/documentation)
+(license Apache-2.0)
 
 (package
  (name pbC)
- (synopsis "A short synopsis")
- (description "A longer description")
- (depends ocaml dune)
- (tags
-  (topics "to describe" your project)))
-
-; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
+ (synopsis "The Futoshiki Game")
+ (description "Solve Futoshiki puzzles using the the backtracking algorithm.")
+ (depends ocaml dune))
